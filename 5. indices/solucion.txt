@@ -1,0 +1,41 @@
+// Estudiante 1: Arturo Barbero Pérez
+
+// Estudiante 2: Miguel Ángel Arroyo Clemente
+
+// Observaciones:
+
+// 1
+db.tweet.createIndex({text:"text"})
+db.tweet.find({$text:{$search:"USA"}}).count()
+
+
+// 2
+db.tweet.find({$text:{$search:"USA WIN"}}).count()
+
+// 3
+db.tweet.find({$text:{$search:"WIN -USA"}}).count()
+
+// 4
+db.tweet.find({$text:{$search: "lie"}},{score:{$meta:"textScore"}, _id:0, text:1 }).sort({score:{$meta:"textScore"}}).limit(1)
+
+// 5.a
+db.tweet.find({$text:{$search: "lie"}, hlabel:-1}).count()/db.twitter.find({hlabel:-1}).count()
+
+// 5.b
+db.tweet.find( {$text: {$search:"lie"}, tlabel:-1 } ).count() / db.tweet.find({tlabel:-1}).count()
+
+// 6
+ db.tweet.aggregate([ {$match: {$text: {$search:"lie"}}  }, {$group: {_id:"$user.screen", count:{$sum:1} }}, {$sort: {count:-1}}  ])
+
+// 7.a
+db.tweet.createIndex({"tlabel":1, "created_at":1})
+
+// 7.b
+	//Número de claves ANTES: 0
+	//Número de documentos ANTES: 17834
+
+	//Número de claves DESPUÉS: 5381
+	//Número de documentos DESPUÉS: 0
+
+// 10
+db.prueba.find({a:2, b:1}).hint({b:1})

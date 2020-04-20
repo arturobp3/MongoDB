@@ -1,0 +1,73 @@
+Bases de datos NoSQL - práctica 4
+
+//Nombre1: Arturo Barbero Pérez
+//Nombre2: Miguel Ángel Arroyo Clemente
+
+//Observaciones:
+
+//P1a Insert:
+
+db.lugares.insert({nombre:"María Zambrano", tipo:"biblioteca", pais:"España", 
+                   posicion: {type:"Point", coordinates:[-3.7354677,40.4492451]}})
+
+//P1b Indice:
+
+db.lugares.createIndex({ posicion: "2dsphere" })
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"ok" : 1
+}
+
+
+//P2 Consulta:
+
+db.lugares.find( { 'posicion' : { $near : {$geometry: { type: 'Point', coordinates: [-3.7251149,40.4381963] } ,$minDistance: 1500 }} },  {_id:0, nombre:1, tipo:1})
+
+//P3a Creación de índices:
+
+db.plano.createIndex({punto:1}, "ipunto")
+db.plano.createIndex({desc:1}, "idesc")
+
+//P3b Comentario sobre dif de tamaños:
+//db.plano.stats()
+
+Bytes ipunto: 1564672
+Bytes idesc: 1409024
+
+ipunto ocupa más porque el campo punto es un array, a diferencia de desc. Lo que hace MongoDB es crear un valor en el índice para cada valor del array. Se llaman indices multikey.
+
+//P4 Consulta:
+
+db.plano.find({"punto.0":{$gt:480}}).count()
+
+//P5a Índice (Sí/No): No
+//P5b ¿Cuál? (si sí): El único indice que existe sobre eso sería ipunto, pero es un indice sobre el array "punto" completo, no sobre uno de sus componentes, y en este caso la consulta es sobre el primer elemento del array no sobre el array completo, por lo que no se utiliza.
+
+//P6 Consulta:
+
+db.plano.find( {punto: {$geoWithin: {$polygon: [[0, 0], [3, 0], [3, 3], [0, 3]] } } } )
+
+//P7 Creación de índice:
+
+db.plano.createIndex({punto: "2d"})
+
+//P8a ¿Sé puede crear el índice?(Sí/No):
+
+No
+
+//P8b ¿Por qué? (una frase):
+
+Por defecto un indice 2D asume longitud y latitud y tiene límites de -180 inclusivos y 180 no inclusivos. Si los documentos contienen datos de coordenadas fuera del rango especificado, MongoDB devuelve un error.
+
+//P9a ¿Sé puede crear el índice para mejorar?(Sí/No):
+
+Si, uno que utilizase todos los elementos que aparecen en la consulta
+
+//P9b Si la respuesta es sí, copiar la instrucción para crearlo. Si es no, escribir una frase explicando por qué.
+
+db.punto.createIndex({punto:1, desc:1})
+
+//P10 Fragmento de código:
+db.lugares.aggregate([ { $geoNear: { near: { type: "Point", coordinates: [-3.7251149,40.4381963] }, distanceField: "dist.calculated", query: { "nombre": "María Zambrano" }, spherical: true } } ])

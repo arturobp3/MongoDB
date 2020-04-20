@@ -1,0 +1,54 @@
+﻿Práctica 3 -  NoSQL - Solución
+Nombre 1: Arturo Barbero Pérez
+Nombre 2: Miguel Ángel Arroyo Clemente
+Observaciones:
+
+
+Respuestas
+
+#1Consulta:
+
+db.webs.aggregate([{$group:{_id:"$navegador", num_ses:{$sum:1}}}, {$sort:{num_ses:1}}])
+
+#2Consulta:
+
+db.webs.aggregate([{$group:{_id:"$nombre", num_ses:{$sum:1}}}, {$sort:{num_ses:-1}}, {$limit:1}])
+
+
+#3Consulta:
+
+db.webs.aggregate([{$unwind:"$pags"}, {$match:{"pags.segs":{$gt:100}}}, {$group:{_id:"$nombre", count:{$sum:1}}}])
+
+#4Consulta:
+
+ db.webs.aggregate([{$group:{_id:{nombre:"$nombre", id:"$_id"}, num_urls:{$sum:1}}}])
+
+
+#5Consulta:
+
+db.webs.aggregate([{$group:{_id:{navegador:"$navegador", "año":{$year:"$fecha"}}, num_ses:{$sum:1}}},{$match:{_id:{ "navegador" : "Explorer", "año" : 2016 }}}])
+
+
+#6Consulta:
+
+db.webs.aggregate([{$group:{_id:{navegador:"$navegador", "año":{$year:"$fecha"}}, num_ses:{$sum:1}}}])
+
+
+#7Consulta:
+
+db.webs.aggregate([{$match:{"pags.url":"https://www.mikokoloko.com"}}, {$group:{_id:0, num_sesiones:{$sum:1}}}])
+
+
+#8Consulta:
+
+db.webs.aggregate([{$unwind:"$pags"}, {$group:{_id:"$pags.url"}}, {$group:{_id:null, numero_webs:{$sum:1}}}])
+
+#9Consulta:
+
+db.webs.aggregate([{$unwind:"$pags"}, {$group:{_id:"$nombre", tiempo:{$sum:"$pags.segs"}}}, {$project:{_id:1, tiempo_min:{$divide:["$tiempo", 60]}}}])
+
+#10Consulta:
+
+db.webs.aggregate([{$unwind:"$pags"}, {$project:{nombre:1, inicio_web:{$substr:["$pags.url",0,5]}}}, {$match:{"inicio_web":"https"}}, {$group:{_id:{nombre:"$nombre"}}}])
+
+
